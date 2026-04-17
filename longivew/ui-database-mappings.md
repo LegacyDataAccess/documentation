@@ -45,16 +45,22 @@ Dashboard Widget
 
 ### Data Source
 Tables: encounters_vitals
-Notes: values are selected from `encounters_vitals` by `patientid` and `itemname` using `VitalSignsItemType` constants. For each vital (Temperature, Blood Pressure, Pulse, SpO2), the most recent row by `encounter_date` is chosen. `lastUpdate` is formatted from `encounter_date`.
+Notes: values are selected from `encounters_vitals` by `patientid` and specific `itemname` codes. For each vital (Temperature, Blood Pressure, Pulse, SpO2), the most recent row by `encounter_date` is chosen. `lastUpdate` is formatted from `encounter_date`.
+
+Exact `itemname` filters used:
+- Temperature → `itemname = 'Temp'`
+- Blood Pressure → `itemname = 'BP'`
+- Pulse → `itemname = 'HR'`
+- SpO2 → `itemname = 'Oxygen sat %'`
 
 ### UI Mapping
 
 | UI Element | Description | Database Table | Database Column | Calculation / Notes |
 |------------|-------------|----------------|-----------------|---------------------|
-| Temperature | Patient temperature | encounters_vitals | value, uom | Latest row where `itemname = 'Temperature'`; `tempValue = value`, `tempUom = uom`. `lastUpdate` from `encounter_date` formatted `MM/dd/yyyy`. |
-| Blood Pressure | Blood pressure | encounters_vitals | value, uom | Latest row where `itemname = 'Blood Pressure'`; `bloodPressureValue = value`, `bloodPressureUom = uom`. |
-| Pulse | Pulse rate | encounters_vitals | value, uom | Latest row where `itemname = 'Pulse'`; `pulseValue = value`, `pulseUom = uom`. |
-| SpO2 | Oxygen saturation | encounters_vitals | value, uom | Latest row where `itemname = 'SpO2'`; `spO2Value = value`, `spO2Uom = uom`. |
+| Temperature | Patient temperature | encounters_vitals | value, uom | Latest row where `itemname = 'Temp'`; `tempValue = value`, `tempUom = uom`. `lastUpdate` from `encounter_date` formatted `MM/dd/yyyy`. |
+| Blood Pressure | Blood pressure | encounters_vitals | value, uom | Latest row where `itemname = 'BP'`; `bloodPressureValue = value`, `bloodPressureUom = uom`. |
+| Pulse | Pulse rate | encounters_vitals | value, uom | Latest row where `itemname = 'HR'`; `pulseValue = value`, `pulseUom = uom`. |
+| SpO2 | Oxygen saturation | encounters_vitals | value, uom | Latest row where `itemname = 'Oxygen sat %'`; `spO2Value = value`, `spO2Uom = uom`. |
 
 ---
 
@@ -65,14 +71,19 @@ Dashboard Widget
 
 ### Data Source
 Tables: encounters_vitals
-Notes: values are selected from `encounters_vitals` by `patientid` and `itemname` using `HWItemNameType` constants. For each of Height, Weight, BMI, the most recent row by `encounter_date` is chosen. `lastUpdate` is taken from BMI’s `encounter_date` if present.
+Notes: values are selected from `encounters_vitals` by `patientid` and `itemname` codes. For each of Height, Weight, BMI, the most recent row by `encounter_date` is chosen. `lastUpdate` is taken from BMI’s `encounter_date` if present.
+
+Exact `itemname` filters used:
+- Height → `itemname = 'Ht'`
+- Weight → `itemname = 'Wt'`
+- BMI → `itemname = 'BMI'`
 
 ### UI Mapping
 
 | UI Element | Description | Database Table | Database Column | Calculation / Notes |
 |------------|-------------|----------------|-----------------|---------------------|
-| Height | Patient height | encounters_vitals | value, uom | Latest row where `itemname = 'Height'`; `heightValue = value`, `heightUom = uom`. |
-| Weight | Patient weight | encounters_vitals | value, uom | Latest row where `itemname = 'Weight'`; `weightValue = value`, `weightUom = uom`. |
+| Height | Patient height | encounters_vitals | value, uom | Latest row where `itemname = 'Ht'`; `heightValue = value`, `heightUom = uom`. |
+| Weight | Patient weight | encounters_vitals | value, uom | Latest row where `itemname = 'Wt'`; `weightValue = value`, `weightUom = uom`. |
 | BMI | Body Mass Index | encounters_vitals | value, uom | Latest row where `itemname = 'BMI'`; `bmiValue = value`, `bmiUom = uom`. `lastUpdate` from this row’s `encounter_date` formatted `MM/dd/yyyy`. |
 
 ---
@@ -237,7 +248,7 @@ Dashboard Widget
 
 ### Data Source
 Tables: patients, encounters_vitals
-Notes: Base demographics from `patients`. `admissionWeight` is taken from the most recent `encounters_vitals` row where `itemname = 'Weight'` and uses `display_value`. `age` is computed from `patients.date_of_birth`.
+Notes: Base demographics from `patients`. `admissionWeight` is taken from the most recent `encounters_vitals` row where `itemname = 'Wt'` and uses `display_value`. `age` is computed from `patients.date_of_birth`.
 
 ### UI Mapping
 
@@ -246,7 +257,7 @@ Notes: Base demographics from `patients`. `admissionWeight` is taken from the mo
 | Name | Patient full name | patients | name_first, name_last | Concatenation in UI: `firstName + ' ' + lastName` from `patients.name_first` and `patients.name_last`. |
 | Age | Patient age | patients | date_of_birth | Calculated as full years between `now` and `date_of_birth`. |
 | Gender | Patient gender | patients | gender | Direct mapping. |
-| Admission Weight | Admission weight | encounters_vitals | display_value | Latest row where `itemname = 'Weight'`; uses `display_value`. |
+| Admission Weight | Admission weight | encounters_vitals | display_value | Latest row where `itemname = 'Wt'`; uses `display_value`. |
 | EMR Number | EMR identifier | patients | mrn | Direct mapping. |
 
 ---
@@ -354,13 +365,13 @@ Page: /vitals
 
 ### Data Source
 Tables: encounters_vitals
-Notes: Direct read from `encounters_vitals` filtered by `patientid` and `isActive=true` at API level (filtering not in entity). Sorting/paging controlled by API.
+Notes: Direct read from `encounters_vitals` filtered by `patientid` and `isActive=true` at API level (filtering not in entity). Sorting/paging controlled by API. Item codes used include: `Ht`, `Wt`, `BMI`, `Temp`, `BP`, `HR`, `Oxygen sat %`.
 
 ### UI Mapping
 
 | UI Element | Description | Database Table | Database Column | Calculation / Notes |
 |------------|-------------|----------------|-----------------|---------------------|
-| Name | Vital sign name | encounters_vitals | itemname | Direct mapping. |
+| Name | Vital sign name | encounters_vitals | itemname | Direct mapping (values such as `Ht`, `Wt`, `BMI`, `Temp`, `BP`, `HR`, `Oxygen sat %`). |
 | Value | Display value | encounters_vitals | display_value | Direct mapping (pre-formatted). |
 | Provider | Healthcare provider | encounters_vitals | provider | Direct mapping. |
 | Facility | Healthcare facility | encounters_vitals | facility | Direct mapping. |
@@ -541,13 +552,13 @@ Page: /height-weight
 
 ### Data Source
 Tables: encounters_vitals
-Notes: Data read from `encounters_vitals` filtered by `patientid` and constrained to Height/Weight/BMI-related `itemname` values. `display_value` is used for the value column. BMI in this table corresponds to the BMI measurement associated with the same date/context.
+Notes: Data read from `encounters_vitals` filtered by `patientid` and constrained to Height/Weight/BMI-related `itemname` values. For this table, Height uses `Ht`, Weight uses `Wt`, BMI uses `BMI`. `display_value` is used for the Value column. BMI in this table corresponds to the BMI measurement associated with the same date/context.
 
 ### UI Mapping
 
 | UI Element | Description | Database Table | Database Column | Calculation / Notes |
 |------------|-------------|----------------|-----------------|---------------------|
-| Vital Name | Height or Weight label | encounters_vitals | itemname | Direct mapping (e.g., 'Height', 'Weight'). |
+| Vital Name | Height or Weight label | encounters_vitals | itemname | Direct mapping (`Ht` or `Wt`). |
 | Value | Measurement value | encounters_vitals | display_value | Direct mapping (pre-formatted). |
 | BMI | Body Mass Index | encounters_vitals | value | The BMI value for the same date where `itemname = 'BMI'`. Grouped by `encounter_date`. |
 | Provider | Healthcare provider | encounters_vitals | provider | Direct mapping. |
@@ -716,7 +727,7 @@ Page: /trends (Clinician Interactions tab)
 
 ### Data Source
 Tables: encounters
-Notes: Read from `encounters`, with fields mapped directly; `type` corresponds to visit type.
+Notes: Read from `encounters`, with fields mapped directly; `type` corresponds to visit type (`visittype`).
 
 ### UI Mapping
 
@@ -735,13 +746,13 @@ Page: /trends (Vital Signs tab)
 
 ### Data Source
 Tables: encounters_vitals
-Notes: For each vital name (including Height/Weight/BMI), values are fetched from `encounters_vitals` by `patientid` and `itemname`, filtered by `encounter_date >= cutoff`. `uom` taken from the first record per vital in range. `data` points come from each matching row’s `value` and `encounter_date` (formatted ISO date-only).
+Notes: For each vital name, values are fetched from `encounters_vitals` by `patientid` and specific `itemname` codes, filtered by `encounter_date >= cutoff`. Codes include `Ht`, `Wt`, `BMI`, `Temp`, `BP`, `HR`, `Oxygen sat %`. `uom` taken from the first record per vital in range. `data` points come from each matching row’s `value` and `encounter_date` (formatted ISO date-only).
 
 ### UI Mapping
 
 | UI Element | Description | Database Table | Database Column | Calculation / Notes |
 |------------|-------------|----------------|-----------------|---------------------|
-| Vital Name | Name of the vital | encounters_vitals | itemname | Direct mapping. |
+| Vital Name | Name/code of the vital | encounters_vitals | itemname | Direct mapping (e.g., `Ht`, `Wt`, `BMI`, `Temp`, `BP`, `HR`, `Oxygen sat %`). |
 | Value | Measurement value | encounters_vitals | value | Direct mapping (time series). |
 | Unit | Unit of measure | encounters_vitals | uom | Taken from the first record for each vital in range. |
 | Date | Record date | encounters_vitals | encounter_date | Formatted as ISO local date (yyyy-MM-dd). |
